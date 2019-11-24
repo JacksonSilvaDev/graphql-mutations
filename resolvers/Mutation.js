@@ -3,10 +3,30 @@ const {
     proximoId
 } = require('../data/db')
 
+function indiceUsuario(filtro) {
+    if (!filtro) return -1;
+
+    const {
+        id,
+        email
+    } = filtro
+
+    if (id) {
+        return usuarios.findIndex(u => u.id === id)
+    } else if (email) {
+        return usuarios.findIndex(u => u.email === email)
+    } else {
+        return -1
+    }
+
+}
+
 module.exports = {
     // {nome, email,idade}
-    novoUsuario(_, args) {
-        const emailExistente = usuarios.some(u => u.email === args.email)
+    novoUsuario(_, {
+        dados
+    }) {
+        const emailExistente = usuarios.some(u => u.email === dados.email)
 
         if (emailExistente) {
             throw new Error('E-mail cadastrado');
@@ -14,7 +34,7 @@ module.exports = {
 
         const novo = {
             id: proximoId(),
-            ...args,
+            ...dados,
             perfil_id: 1,
             status: 'ATIVO'
         }
@@ -22,10 +42,10 @@ module.exports = {
         usuarios.push(novo)
         return novo
     },
-    excluiurUsuario(_, {
-        id
+    excluirUsuario(_, {
+        filtro
     }) {
-        const i = usuarios.findIndex(u => u.id === id)
+        const i = indiceUsuario(filtro)
 
         if (i < 0) throw new Error('Usuário não encontrado');
         const excluidos = usuarios.splice(i, 1)
